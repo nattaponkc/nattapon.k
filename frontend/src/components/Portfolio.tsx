@@ -1,0 +1,79 @@
+'use client';
+
+import Link from 'next/link';
+import styles from '../styles/Portfolio.module.css';
+
+export const Portfolio = () => {
+  const projects = [
+    {
+      id: 'web-coffee',
+      icon: '01',
+      title: 'เว็บไซต์ Café & Hotel Management',
+      description: 'เว็บไซต์แอปพลิเคชันระบบบริหารจัดการร้านคาเฟ่และจองห้องพัก',
+      tags: ['Php', 'MySQL', 'Bootstrap', 'CSS'],
+    },
+    {
+      id: 'ecommerce',
+      icon: '02',
+      title: 'ระบบ E-Commerce',
+      description: 'พัฒนาระบบขายของออนไลน์พร้อมการชำระเงิน',
+      tags: ['TypeScript', 'Node.js', 'Express', 'MongoDB'],
+    },
+    {
+      id: 'analytics',
+      icon: '03',
+      title: 'ระบบแอนะลิติกส์',
+      description: 'สร้างแดชบอร์ดแสดงข้อมูลและสถิติ',
+      tags: ['React', 'TypeScript', 'D3.js', 'Node.js'],
+    },
+    {
+      id: 'mobile-app',
+      icon: '04',
+      title: 'Application Mobile Responsive',
+      description: 'แอปพลิเคชันที่ทำงานได้ดีบนอุปกรณ์ต่าง ๆ',
+      tags: ['React Native', 'TypeScript', 'CSS3'],
+    },
+    {
+      id: 'auth-system',
+      icon: '05',
+      title: 'ระบบจัดการสมาชิก',
+      description: 'ระบบเข้าสู่ระบบและจัดการสิทธิ์การเข้าถึง',
+      tags: ['TypeScript', 'Node.js', 'JWT', 'MongoDB'],
+    },
+    {
+      id: 'optimization',
+      icon: '06',
+      title: 'Optimization และ Performance',
+      description: 'เพิ่มประสิทธิภาพของเว็บไซต์และความเร็วการโหลด',
+      tags: ['Performance', 'SEO', 'Caching'],
+    },
+  ];
+
+  return (
+    <section id="portfolio" className={styles.portfolio}>
+      <p className={styles.sectionLabel}>Projects</p>
+      <h2 className={styles.title}>ผลงานของฉัน</h2>
+      <div className={styles.grid}>
+        {projects.map((project, index) => (
+          <Link key={index} href={`/projects/${project.id}`} className={styles.itemLink}>
+            <div className={styles.item}>
+              <div className={styles.imageWrap}>
+                <span className={styles.iconBig}>{project.icon}</span>
+              </div>
+              <div className={styles.content}>
+                <h3>{project.title}</h3>
+                <p>{project.description}</p>
+                <div className={styles.tags}>
+                  {project.tags.map((tag, idx) => (
+                    <span key={idx} className={styles.tag}>{tag}</span>
+                  ))}
+                </div>
+                <span className={styles.viewLink}>View Details →</span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+};
