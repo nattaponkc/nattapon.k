@@ -17,7 +17,7 @@ export const Header = () => {
       <nav className={styles.nav}>
         <div className={styles.logo}>
           <span className={styles.logoDot} />
-          ณัฐพล ฆ้องคำ
+          Nattapon kongcome
         </div>
         <ul className={styles.navList}>
           <li><a href="#home" onClick={smoothScroll}>Home</a></li>
