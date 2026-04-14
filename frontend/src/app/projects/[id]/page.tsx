@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { notFound } from 'next/navigation';
+import { ProjectAnimatedBackground } from '../../../components/ProjectAnimatedBackground';
 import styles from '../../../styles/ProjectDetail.module.css';
 
 const projectsData: Record<string, any> = {
@@ -108,25 +109,61 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   ].filter(Boolean) as ('admin' | 'staff' | 'member')[];
 
   const [activeTab, setActiveTab] = useState<'admin' | 'staff' | 'member'>(availableTabs[0] || 'admin');
-  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [showHeroLightbox, setShowHeroLightbox] = useState(false);
 
   const images = activeTab === 'admin' ? project.adminImages : activeTab === 'staff' ? project.staffImages : project.memberImages;
+  
+  // Handle lightbox navigation
+  const handlePrevLightbox = () => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex(lightboxIndex === 0 ? images.length - 1 : lightboxIndex - 1);
+  };
+
+  const handleNextLightbox = () => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex(lightboxIndex === images.length - 1 ? 0 : lightboxIndex + 1);
+  };
+
+  const closeLightbox = () => setLightboxIndex(null);
+  const closeHeroLightbox = () => setShowHeroLightbox(false);
   
   // Get hero image from available images
   const heroImage = project.memberImages?.length > 1 ? project.memberImages[1] : project.adminImages?.[0] || project.staffImages?.[0];
 
   return (
     <div className={styles.page}>
-      {/* Lightbox */}
-      {lightbox && (
-        <div className={styles.lightbox} onClick={() => setLightbox(null)}>
-          <button className={styles.lightboxClose} onClick={() => setLightbox(null)}>✕</button>
-          <img src={lightbox} alt="screenshot" onClick={(e) => e.stopPropagation()} />
+      <ProjectAnimatedBackground />
+      
+      {/* Hero Lightbox (no navigation) */}
+      {showHeroLightbox && (
+        <div className={styles.lightbox} onClick={closeHeroLightbox}>
+          <button className={styles.lightboxClose} onClick={closeHeroLightbox}>✕</button>
+          <img src={heroImage} alt="hero preview" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+
+      {/* Screenshots Lightbox (with navigation) */}
+      {lightboxIndex !== null && (
+        <div className={styles.lightbox} onClick={closeLightbox}>
+          <button className={styles.lightboxClose} onClick={closeLightbox}>✕</button>
+          <button className={styles.lightboxPrev} onClick={(e) => { e.stopPropagation(); handlePrevLightbox(); }}>
+            <svg width="24" height="40" viewBox="0 0 24 40" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 4 20 20 34"></polyline>
+            </svg>
+          </button>
+          <img src={images[lightboxIndex]} alt={`screenshot ${lightboxIndex + 1}`} onClick={(e) => e.stopPropagation()} />
+          <button className={styles.lightboxNext} onClick={(e) => { e.stopPropagation(); handleNextLightbox(); }}>
+            <svg width="24" height="40" viewBox="0 0 24 40" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="4 6 20 20 4 34"></polyline>
+            </svg>
+          </button>
+          <div className={styles.lightboxCounter}>{lightboxIndex + 1} / {images.length}</div>
         </div>
       )}
 
       <div className={styles.topBar}>
-        <Link href="/" className={styles.backBtn}>← Home</Link>
+        <Link href="/#portfolio" className={styles.backBtn}>← Portfolio</Link>
       </div>
 
       {/* Header */}
@@ -142,7 +179,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       </div>
 
       {/* Hero preview */}
-      <div className={styles.heroImage} onClick={() => setLightbox(heroImage)}>
+      <div className={styles.heroImage} onClick={() => setShowHeroLightbox(true)}>
         <img src={heroImage} alt="preview" />
         <div className={styles.heroOverlay}>Click to enlarge</div>
       </div>
@@ -244,7 +281,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
         <div className={styles.screenshotGrid}>
           {images.map((src: string, i: number) => (
-            <div key={i} className={styles.screenshotItem} onClick={() => setLightbox(src)}>
+            <div key={i} className={styles.screenshotItem} onClick={() => setLightboxIndex(i)}>
               <img src={src} alt={`screenshot ${i + 1}`} loading="lazy" onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }} />
               <div className={styles.screenshotOverlay}>
                 <span>⤢</span>

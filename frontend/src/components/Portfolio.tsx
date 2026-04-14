@@ -7,21 +7,21 @@ export const Portfolio = () => {
   const projects = [
     {
       id: 'web-coffee',
-      icon: '01',
+      image: '/images/imgPortfolio/Add More Cafe\' & Sbay Home Stay.png',
       title: 'Café & Homestay Management System',
       description: 'เว็บไซต์แอปพลิเคชันระบบบริหารจัดการร้านคาเฟ่และจองห้องพัก',
       tags: ['Php', 'MySQL', 'Bootstrap', 'CSS'],
     },
     {
       id: 'research-management',
-      icon: '02',
+      image: '/images/imgPortfolio/Research publication.png',
       title: 'Research Publication Management System',
       description: 'ระบบบริหารจัดการข้อมูลผลงานวิจัยสำหรับอาจารย์ในมหาวิทยาลัย',
       tags: ['Php', 'MySQL', 'Bootstrap', 'CSS'],
     },
     {
       id: 'web-board',
-      icon: '03',
+      image: '/images/imgPortfolio/webboard.png',
       title: 'Web-board',
       description: 'เว็บบอร์ดสำหรับการแลกเปลี่ยนความคิดเห็นและการสนทนา',
       tags: ['Php', 'MySQL', 'Bootstrap', 'CSS'],
@@ -58,7 +58,11 @@ export const Portfolio = () => {
           <Link key={index} href={`/projects/${project.id}`} className={styles.itemLink}>
             <div className={styles.item}>
               <div className={styles.imageWrap}>
-                <span className={styles.iconBig}>{project.icon}</span>
+                {project.image ? (
+                  <img src={project.image} alt={project.title} />
+                ) : (
+                  <span className={styles.iconBig}>{project.icon}</span>
+                )}
               </div>
               <div className={styles.content}>
                 <h3>{project.title}</h3>
