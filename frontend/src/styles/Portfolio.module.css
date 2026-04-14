@@ -26,18 +26,99 @@
   gap: 1.5rem;
 }
 
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes glitch {
+  0%, 100% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%);
+  }
+  20% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 5%, 0% 3%);
+  }
+  40% {
+    clip-path: polygon(0% 3%, 100% 2%, 100% 8%, 0% 7%);
+  }
+  60% {
+    clip-path: polygon(0% 7%, 100% 6%, 100% 15%, 0% 14%);
+  }
+  80% {
+    clip-path: polygon(0% 14%, 100% 14%, 100% 20%, 0% 18%);
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(163, 230, 53, 0.3), inset 0 0 10px rgba(163, 230, 53, 0.1);
+    border-color: rgba(163, 230, 53, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(163, 230, 53, 0.6), inset 0 0 10px rgba(163, 230, 53, 0.2);
+    border-color: rgba(163, 230, 53, 0.8);
+  }
+}
+
 .item {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.3s ease;
   cursor: pointer;
+  position: relative;
+}
+
+.item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(163, 230, 53, 0.1) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(163, 230, 53, 0.8), transparent);
+  animation: scanline 3s linear infinite;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
 }
 
 .item:hover {
-  border-color: var(--accent);
+  border-color: #a3e635;
   transform: translateY(-4px);
+  animation: borderGlow 1.5s ease-in-out infinite;
+}
+
+.item:hover::before {
+  opacity: 1;
+}
+
+.item:hover::after {
+  opacity: 1;
 }
 
 .imageWrap {
@@ -51,10 +132,35 @@
   position: relative;
 }
 
+.imageWrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(163, 230, 53, 0.15) 0px,
+    rgba(163, 230, 53, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.item:hover .imageWrap::before {
+  opacity: 1;
+}
+
 .iconBig {
   font-size: 2.5rem;
   opacity: 0.6;
   transition: opacity 0.2s ease, transform 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .item:hover .iconBig {
@@ -64,6 +170,8 @@
 
 .content {
   padding: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .content h3 {
@@ -113,12 +221,13 @@
   margin-top: 1rem;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--accent);
-  transition: transform 0.2s ease;
+  color: #a3e635;
+  transition: transform 0.2s ease, text-shadow 0.2s ease;
 }
 
 .item:hover .viewLink {
   transform: translateX(4px);
+  text-shadow: 0 0 8px rgba(163, 230, 53, 0.6);
 }
 
 @media (max-width: 768px) {

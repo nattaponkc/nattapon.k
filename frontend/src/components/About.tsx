@@ -101,7 +101,7 @@ export const About = () => {
             </div>
             <div className={styles.infoCard}>
               <h4>Status</h4>
-              <p>Graduate</p>
+              <p>Graduated</p>
             </div>
           </div>
         </div>
