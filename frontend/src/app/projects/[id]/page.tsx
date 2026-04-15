@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { ProjectAnimatedBackground } from '../../../components/ProjectAnimatedBackground';
 import styles from '../../../styles/ProjectDetail.module.css';
@@ -111,6 +111,10 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [activeTab, setActiveTab] = useState<'admin' | 'staff' | 'member'>(availableTabs[0] || 'admin');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showHeroLightbox, setShowHeroLightbox] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
 
   const images = activeTab === 'admin' ? project.adminImages : activeTab === 'staff' ? project.staffImages : project.memberImages;
   
@@ -127,6 +131,55 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
   const closeLightbox = () => setLightboxIndex(null);
   const closeHeroLightbox = () => setShowHeroLightbox(false);
+
+  // Drag to scroll thumbnail strip
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setStartX(e.pageX - (thumbnailsRef.current?.offsetLeft || 0));
+    setScrollLeft(thumbnailsRef.current?.scrollLeft || 0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !thumbnailsRef.current) return;
+    const x = e.pageX - (thumbnailsRef.current?.offsetLeft || 0);
+    const walk = x - startX;
+    const newScrollLeft = scrollLeft - walk;
+    // Constrain scroll value
+    thumbnailsRef.current.scrollLeft = Math.max(0, Math.min(newScrollLeft, thumbnailsRef.current.scrollWidth - thumbnailsRef.current.clientWidth));
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  // Auto-scroll thumbnail to keep active thumbnail in view
+  useEffect(() => {
+    if (lightboxIndex !== null && thumbnailsRef.current) {
+      const thumbnails = thumbnailsRef.current.querySelectorAll(`.${styles.thumbnail}`);
+      if (thumbnails[lightboxIndex]) {
+        const activeThumbnail = thumbnails[lightboxIndex] as HTMLElement;
+        const container = thumbnailsRef.current;
+        
+        const thumbnailLeft = activeThumbnail.offsetLeft;
+        const thumbnailRight = thumbnailLeft + activeThumbnail.offsetWidth;
+        const containerLeft = container.scrollLeft;
+        const containerRight = containerLeft + container.clientWidth;
+        
+        // Scroll only if thumbnail is outside the visible area
+        if (thumbnailLeft < containerLeft) {
+          // Thumbnail is to the left, scroll left
+          container.scrollTo({ left: thumbnailLeft, behavior: 'smooth' });
+        } else if (thumbnailRight > containerRight) {
+          // Thumbnail is to the right, scroll right
+          container.scrollTo({ left: thumbnailRight - container.clientWidth, behavior: 'smooth' });
+        }
+      }
+    }
+  }, [lightboxIndex, styles.thumbnail]);
   
   // Get hero image from available images
   const heroImage = project.memberImages?.length > 1 ? project.memberImages[1] : project.adminImages?.[0] || project.staffImages?.[0];
@@ -158,7 +211,29 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               <polyline points="4 6 20 20 4 34"></polyline>
             </svg>
           </button>
-          <div className={styles.lightboxCounter}>{lightboxIndex + 1} / {images.length}</div>
+          
+          {/* Thumbnail Strip */}
+          <div
+            ref={thumbnailsRef}
+            className={styles.lightboxThumbnails}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          >
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt={`thumbnail ${idx + 1}`}
+                className={`${styles.thumbnail} ${idx === lightboxIndex ? styles.activeThumbnail : ''}`}
+                onClick={() => setLightboxIndex(idx)}
+                draggable={false}
+              />
+            ))}
+          </div>
         </div>
       )}
 
