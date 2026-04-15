@@ -22,8 +22,17 @@
   font-size: 0.8rem;
   font-weight: 500;
   margin-bottom: 2rem;
-  animation: fadeUp 0.5s ease forwards;
+  animation: fadeInShadow 3s ease-out forwards;
   width: fit-content;
+}
+
+@keyframes fadeInShadow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .tagDot {
@@ -39,6 +48,81 @@
   50% { opacity: 0.3; }
 }
 
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes blurFadeIn {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInSlow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .title {
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 800;
@@ -49,8 +133,21 @@
   animation: fadeUp 0.6s ease 0.1s both;
 }
 
-.titleAccent {
+.titlePart1 {
+  display: inline-block;
+  animation: fadeInDown 0.7s ease 0.15s both;
+}
+
+.titlePart2 {
+  display: inline-block;
   color: var(--accent);
+  animation: slideInRight 0.7s ease 0.35s both;
+}
+
+.titlePart3 {
+  display: inline-block;
+  color: var(--accent);
+  animation: slideInLeft 0.8s ease 0.55s both;
 }
 
 .subtitle {
@@ -59,14 +156,13 @@
   max-width: 480px;
   line-height: 1.7;
   margin-bottom: 2.5rem;
-  animation: fadeUp 0.6s ease 0.2s both;
+  animation: blurFadeIn 1s ease-out 0.8s both;
 }
 
 .buttonGroup {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  animation: fadeUp 0.6s ease 0.3s both;
 }
 
 .btnPrimary {
@@ -80,6 +176,7 @@
   font-weight: 600;
   font-size: 0.9rem;
   transition: opacity 0.2s ease, transform 0.2s ease;
+  animation: slideInFromLeft 0.7s ease-out 1.2s both;
 }
 
 .btnPrimary:hover {
@@ -99,6 +196,7 @@
   font-size: 0.9rem;
   border: 1px solid var(--border);
   transition: border-color 0.2s ease, transform 0.2s ease;
+  animation: slideInFromBottom 0.7s ease-out 1.35s both;
 }
 
 .btnSecondary:hover {
@@ -121,6 +219,20 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  opacity: 0;
+  animation: fadeInSlow 0.8s ease-out forwards;
+}
+
+.socialLink:nth-child(1) {
+  animation-delay: 1.5s;
+}
+
+.socialLink:nth-child(2) {
+  animation-delay: 1.7s;
+}
+
+.socialLink:nth-child(3) {
+  animation-delay: 1.9s;
 }
 
 .socialLink:hover {

@@ -154,11 +154,11 @@ export const About = () => {
                         className="skill-badge"
                         onMouseEnter={(e) => {
                           const tooltip = e.currentTarget.nextElementSibling;
-                          if (tooltip) tooltip.style.display = 'block';
+                          if (tooltip && tooltip instanceof HTMLElement) (tooltip as HTMLElement).style.display = 'block';
                         }}
                         onMouseLeave={(e) => {
                           const tooltip = e.currentTarget.nextElementSibling;
-                          if (tooltip) tooltip.style.display = 'none';
+                          if (tooltip && tooltip instanceof HTMLElement) (tooltip as HTMLElement).style.display = 'none';
                         }}
                       >
                         {skill.name}
@@ -210,3 +210,4 @@ export const About = () => {
     </section>
   );
 };
+

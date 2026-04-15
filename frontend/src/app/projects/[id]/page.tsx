@@ -43,7 +43,7 @@ const projectsData: Record<string, any> = {
     subtitle: 'สำหรับมหาวิทยาลัยพะเยา - บริหารผลงานวิจัยและสิ่งพิมพ์',
     tags: ['PHP', 'MySQL', 'Bootstrap', 'Chart.js', 'OAuth2', 'SerpAPI'],
     year: '2026',
-    role: 'Full Stack Developer',
+    role: 'Full Stack Developer (Frontend & Backend)',
     status: 'Completed',
     overview: 'ระบบบริหารจัดการข้อมูลผลงานวิจัยและสิ่งพิมพ์ของมหาวิทยาลัยพะเยา รองรับการดึงข้อมูลอัตโนมัติจาก Google Scholar ผ่าน SerpAPI พร้อมแสดงสถิติการวิจัยแบบ Real-time สำหรับบุคลากรและหน่วยงานภายในมหาวิทยาลัย',
     features: [
@@ -116,7 +116,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [scrollLeft, setScrollLeft] = useState(0);
   const thumbnailsRef = useRef<HTMLDivElement>(null);
 
-  const images = activeTab === 'admin' ? project.adminImages : activeTab === 'staff' ? project.staffImages : project.memberImages;
+  const images: string[] = activeTab === 'admin' ? project.adminImages : activeTab === 'staff' ? project.staffImages : project.memberImages;
   
   // Handle lightbox navigation
   const handlePrevLightbox = () => {
@@ -368,3 +368,4 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     </div>
   );
 }
+

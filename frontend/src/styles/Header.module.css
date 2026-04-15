@@ -1,3 +1,14 @@
+@keyframes slideDownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .header {
   background: rgba(10, 10, 10, 0.204);
   backdrop-filter: blur(12px);
@@ -9,6 +20,7 @@
   top: 0;
   z-index: 1000;
   transition: background 0.3s ease;
+  animation: slideDownFadeIn 0.8s ease-out forwards;
 }
 
 .nav {

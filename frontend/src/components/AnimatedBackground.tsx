@@ -31,6 +31,8 @@ export const AnimatedBackground = () => {
   const orbsRef = useRef<Orb[]>([]);
   const animationRef = useRef<number>();
   const mouseRef = useRef({ x: 0, y: 0 });
+  const fadeInProgressRef = useRef(0); // Track fade-in animation (0 to 1)
+  const startTimeRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,7 +60,7 @@ export const AnimatedBackground = () => {
           vx: (Math.random() - 0.5) * 0.5,
           vy: (Math.random() - 0.5) * 0.5,
           size: Math.random() * 1.5 + 0.5,
-          opacity: Math.random() * 0.5 + 0.2,
+          opacity: 0, // Start with 0 opacity for fade-in effect
           color: Math.random() > 0.5 ? '#a3e635' : '#60a5fa',
         });
       }
@@ -93,7 +95,7 @@ export const AnimatedBackground = () => {
           baseX: 0,
           baseY: 0,
           angle: 0,
-          size: 50,
+          size: 30,
           color: '#3dd606',
           speed: 0,
           isFollowMouse: true,
@@ -107,11 +109,14 @@ export const AnimatedBackground = () => {
     };
 
     // Draw glowing circle with blur
-    const drawGlowingOrb = (x: number, y: number, size: number, color: string, hasInnerCircle: boolean = true) => {
+    const drawGlowingOrb = (x: number, y: number, size: number, color: string, hasInnerCircle: boolean = true, fadeInProgress: number = 1) => {
       // Create gradient
       const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-      gradient.addColorStop(0, color + '40');
-      gradient.addColorStop(0.5, color + '20');
+      const alpha40 = Math.round(64 * fadeInProgress); // 64 = 255 * 0.25 (40 in hex)
+      const alpha20 = Math.round(32 * fadeInProgress); // 32 = 255 * 0.125 (20 in hex)
+      
+      gradient.addColorStop(0, color + alpha40.toString(16).padStart(2, '0'));
+      gradient.addColorStop(0.5, color + alpha20.toString(16).padStart(2, '0'));
       gradient.addColorStop(1, color + '00');
 
       ctx.fillStyle = gradient;
@@ -121,7 +126,8 @@ export const AnimatedBackground = () => {
 
       // Inner glow (only for orbs that need it)
       if (hasInnerCircle) {
-        ctx.strokeStyle = color + '60';
+        const alpha60 = Math.round(96 * fadeInProgress); // 96 = 255 * 0.375 (60 in hex)
+        ctx.strokeStyle = color + alpha60.toString(16).padStart(2, '0');
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
@@ -145,6 +151,7 @@ export const AnimatedBackground = () => {
     const updateParticles = () => {
       const particles = particlesRef.current;
       const mouse = mouseRef.current;
+      const fadeInProgress = fadeInProgressRef.current;
 
       particles.forEach((particle) => {
         // Update position
@@ -170,10 +177,13 @@ export const AnimatedBackground = () => {
           const angle = Math.atan2(dy, dx);
           particle.vx -= Math.cos(angle) * 0.2;
           particle.vy -= Math.sin(angle) * 0.2;
-          particle.opacity = Math.min(1, particle.opacity + 0.05);
+          particle.opacity = Math.min(
+            (Math.random() * 0.5 + 0.2) * fadeInProgress, 
+            particle.opacity + 0.05
+          );
         } else {
           particle.opacity = Math.max(
-            0.2,
+            (Math.random() * 0.5 + 0.2) * fadeInProgress * 0.5,
             particle.opacity - 0.01
           );
         }
@@ -208,6 +218,15 @@ export const AnimatedBackground = () => {
 
     // Animation loop
     const animate = () => {
+      // Calculate fade-in progress (2500ms = 2.5 seconds)
+      const currentTime = performance.now();
+      if (startTimeRef.current === 0) {
+        startTimeRef.current = currentTime;
+      }
+      const elapsedTime = currentTime - startTimeRef.current;
+      const fadeInDuration = 2500; // 2.5 seconds fade-in
+      fadeInProgressRef.current = Math.min(1, elapsedTime / fadeInDuration);
+
       // Clear with dark background
       ctx.fillStyle = '#0a0e27';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -219,10 +238,10 @@ export const AnimatedBackground = () => {
       updateOrbs();
       updateParticles();
 
-      // Draw orbs
+      // Draw orbs with fade-in effect
       orbsRef.current.forEach((orb) => {
         const hasInnerCircle = !orb.isFollowMouse;
-        drawGlowingOrb(orb.x, orb.y, orb.size, orb.color, hasInnerCircle);
+        drawGlowingOrb(orb.x, orb.y, orb.size, orb.color, hasInnerCircle, fadeInProgressRef.current);
       });
 
       // Draw particles

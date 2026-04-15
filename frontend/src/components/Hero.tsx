@@ -12,8 +12,9 @@ export const Hero = () => {
         </div>
 
         <h1 className={styles.title}>
-          NATTAPON<br />
-          <span className={styles.titleAccent}>KONGCOME</span>
+          <span className={styles.titlePart1}>NATTA</span><span className={styles.titlePart2}>PON</span>
+          <br />
+          <span className={styles.titlePart3}>KONGCOME</span>
         </h1>
 
         <p className={styles.subtitle}>
@@ -40,7 +41,7 @@ export const Hero = () => {
             Email
           </a>
           <a href="#contact" className={styles.socialLink}>
-            Discord
+            Line
           </a>
         </div>
 

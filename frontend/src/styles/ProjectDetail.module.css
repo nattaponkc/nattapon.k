@@ -292,7 +292,7 @@
 .screenshotGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 12px;
+  gap: 22px;
 }
 
 .screenshotItem {
