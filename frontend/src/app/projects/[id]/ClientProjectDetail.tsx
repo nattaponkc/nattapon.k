@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
 import { ProjectAnimatedBackground } from '../../../components/ProjectAnimatedBackground';
 import styles from '../../../styles/ProjectDetail.module.css';
 
@@ -20,13 +20,14 @@ interface ProjectData {
     backend: string[];
     frontend: string[];
     apis?: string[];
+    database?: string[];
   };
   adminImages: string[];
   staffImages: string[];
   memberImages: string[];
 }
 
-export default function ClientProjectDetail({ project }: { project: ProjectData }) {
+export default function ClientProjectDetail({ project, params }: { project: ProjectData; params?: { id: string } }) {
   // Determine available tabs
   const availableTabs = [
     project.adminImages?.length > 0 && 'admin',
@@ -111,160 +112,185 @@ export default function ClientProjectDetail({ project }: { project: ProjectData 
   const heroImage = project.memberImages?.length > 1 ? project.memberImages[1] : project.adminImages?.[0] || project.staffImages?.[0];
 
   return (
-    <div className={styles.projectDetailContainer}>
+    <div className={styles.page}>
       <ProjectAnimatedBackground />
       
-      <div className={styles.projectDetailContent}>
-        {/* Header Section */}
-        <div className={styles.headerSection}>
-          <Link href="/projects" className={styles.backLink}>
-            ← Back to Projects
-          </Link>
+      {/* Hero Lightbox (no navigation) */}
+      {showHeroLightbox && (
+        <div className={styles.lightbox} onClick={closeHeroLightbox}>
+          <button className={styles.lightboxClose} onClick={closeHeroLightbox}>✕</button>
+          <img src={heroImage} alt="hero preview" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+
+      {/* Screenshots Lightbox (with navigation) */}
+      {lightboxIndex !== null && (
+        <div className={styles.lightbox} onClick={closeLightbox}>
+          <button className={styles.lightboxClose} onClick={closeLightbox}>✕</button>
+          <button className={styles.lightboxPrev} onClick={(e) => { e.stopPropagation(); handlePrevLightbox(); }}>
+            <svg width="24" height="40" viewBox="0 0 24 40" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 4 20 20 34"></polyline>
+            </svg>
+          </button>
+          <img src={images[lightboxIndex]} alt={`screenshot ${lightboxIndex + 1}`} onClick={(e) => e.stopPropagation()} />
+          <button className={styles.lightboxNext} onClick={(e) => { e.stopPropagation(); handleNextLightbox(); }}>
+            <svg width="24" height="40" viewBox="0 0 24 40" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="4 6 20 20 4 34"></polyline>
+            </svg>
+          </button>
+          
+          {/* Thumbnail Strip */}
+          <div
+            ref={thumbnailsRef}
+            className={styles.lightboxThumbnails}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          >
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt={`thumbnail ${idx + 1}`}
+                className={`${styles.thumbnail} ${idx === lightboxIndex ? styles.activeThumbnail : ''}`}
+                onClick={() => setLightboxIndex(idx)}
+                draggable={false}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className={styles.topBar}>
+        <Link href="/#portfolio" className={styles.backBtn}>← Portfolio</Link>
+      </div>
+
+      {/* Header */}
+      <div className={styles.header}>
+        <span className={styles.iconNum}>{project.icon}</span>
+        <div>
           <h1 className={styles.title}>{project.title}</h1>
           <p className={styles.subtitle}>{project.subtitle}</p>
-          <div className={styles.meta}>
-            <span className={styles.year}>{project.year}</span>
-            <span className={styles.role}>{project.role}</span>
-            <span className={`${styles.status} ${styles[project.status.toLowerCase()]}`}>
-              {project.status}
-            </span>
+          <div className={styles.tags}>
+            {project.tags.map((t: string, i: number) => <span key={i}>{t}</span>)}
           </div>
         </div>
+      </div>
 
-        {/* Hero Image Section */}
-        {heroImage && (
-          <div className={styles.heroSection}>
-            <img 
-              src={heroImage} 
-              alt="Hero" 
-              className={styles.heroImage}
-              onClick={() => setShowHeroLightbox(true)}
-            />
-            {showHeroLightbox && (
-              <div className={styles.lightbox} onClick={closeHeroLightbox}>
-                <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
-                  <img src={heroImage} alt="Hero" className={styles.lightboxImage} />
-                  <button className={styles.closeButton} onClick={closeHeroLightbox}>×</button>
-                </div>
+      {/* Hero preview */}
+      <div className={styles.heroImage} onClick={() => setShowHeroLightbox(true)}>
+        <img src={heroImage} alt="preview" />
+        <div className={styles.heroOverlay}>Click to enlarge</div>
+      </div>
+
+      {/* Meta row */}
+      <div className={styles.metaRow}>
+        <div className={styles.metaItem}><span className={styles.metaLabel}>Role</span><span>{project.role}</span></div>
+        <div className={styles.metaItem}><span className={styles.metaLabel}>Year</span><span>{project.year}</span></div>
+        <div className={styles.metaItem}><span className={styles.metaLabel}>Status</span><span className={styles.statusBadge}>{project.status}</span></div>
+      </div>
+
+      {/* Overview */}
+      <div className={styles.section}>
+        <h2>Overview</h2>
+        <p>{project.overview}</p>
+      </div>
+
+      {/* Features */}
+      <div className={styles.section}>
+        <h2>Core Features</h2>
+        <ul className={styles.featureList}>
+          {project.features.map((f: string, i: number) => (
+            <li key={i}><span className={styles.arrow}>→</span>{f}</li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Technology Stack */}
+      {project.technology && (
+        <div className={styles.section}>
+          <h2>Tech Stack</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+            {project.technology.backend && (
+              <div style={{ borderLeft: '3px solid #a3e635', paddingLeft: '15px' }}>
+                <h4 style={{ color: '#a3e635', marginBottom: '10px' }}>Backend</h4>
+                <ul style={{ listStyle: 'none' }}>
+                  {project.technology.backend.map((tech: string, i: number) => (
+                    <li key={i} style={{ marginBottom: '5px', fontSize: '14px' }}>- {tech}</li>
+                  ))}
+                </ul>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Overview Section */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Project Overview</h2>
-          <p className={styles.overview}>{project.overview}</p>
-        </div>
-
-        {/* Features Section */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Key Features</h2>
-          <ul className={styles.featuresList}>
-            {project.features.map((feature, idx) => (
-              <li key={idx} className={styles.featureItem}>{feature}</li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Technology Section */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Technology Stack</h2>
-          <div className={styles.techGrid}>
-            <div className={styles.techCategory}>
-              <h3>Backend</h3>
-              <ul>
-                {project.technology.backend.map((tech, idx) => (
-                  <li key={idx}>{tech}</li>
-                ))}
-              </ul>
-            </div>
-            <div className={styles.techCategory}>
-              <h3>Frontend</h3>
-              <ul>
-                {project.technology.frontend.map((tech, idx) => (
-                  <li key={idx}>{tech}</li>
-                ))}
-              </ul>
-            </div>
+            {project.technology.frontend && (
+              <div style={{ borderLeft: '3px solid #06b6d4', paddingLeft: '15px' }}>
+                <h4 style={{ color: '#06b6d4', marginBottom: '10px' }}>Frontend</h4>
+                <ul style={{ listStyle: 'none' }}>
+                  {project.technology.frontend.map((tech: string, i: number) => (
+                    <li key={i} style={{ marginBottom: '5px', fontSize: '14px' }}>- {tech}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {project.technology.apis && (
-              <div className={styles.techCategory}>
-                <h3>APIs</h3>
-                <ul>
-                  {project.technology.apis.map((api, idx) => (
-                    <li key={idx}>{api}</li>
+              <div style={{ borderLeft: '3px solid #f59e0b', paddingLeft: '15px' }}>
+                <h4 style={{ color: '#f59e0b', marginBottom: '10px' }}>APIs & Integration</h4>
+                <ul style={{ listStyle: 'none' }}>
+                  {project.technology.apis.map((api: string, i: number) => (
+                    <li key={i} style={{ marginBottom: '5px', fontSize: '14px' }}>- {api}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {project.technology.database && (
+              <div style={{ borderLeft: '3px solid #ec4899', paddingLeft: '15px' }}>
+                <h4 style={{ color: '#ec4899', marginBottom: '10px' }}>Database</h4>
+                <ul style={{ listStyle: 'none' }}>
+                  {project.technology.database.map((db: string, i: number) => (
+                    <li key={i} style={{ marginBottom: '5px', fontSize: '14px' }}>💾 {db}</li>
                   ))}
                 </ul>
               </div>
             )}
           </div>
         </div>
+      )}
 
-        {/* Tags Section */}
-        <div className={styles.section}>
-          <div className={styles.tags}>
-            {project.tags.map((tag, idx) => (
-              <span key={idx} className={styles.tag}>{tag}</span>
-            ))}
+      {/* Screenshots */}
+      <div className={styles.section}>
+        <div className={styles.tabsHeader}>
+          <h2>Screenshots</h2>
+          <div className={styles.tabs}>
+            {availableTabs.includes('admin') && (
+              <button className={`${styles.tab} ${activeTab === 'admin' ? styles.active : ''}`} onClick={() => setActiveTab('admin')}>
+                Admin {params?.id === 'web-coffee' ? '(เจ้าของร้าน)' : ''} <span className={styles.count}>{project.adminImages.length}</span>
+              </button>
+            )}
+            {availableTabs.includes('staff') && (
+              <button className={`${styles.tab} ${activeTab === 'staff' ? styles.active : ''}`} onClick={() => setActiveTab('staff')}>
+                Staff (พนักงาน) <span className={styles.count}>{project.staffImages.length}</span>
+              </button>
+            )}
+            {availableTabs.includes('member') && (
+              <button className={`${styles.tab} ${activeTab === 'member' ? styles.active : ''}`} onClick={() => setActiveTab('member')}>
+                Member (ลูกค้า) <span className={styles.count}>{project.memberImages.length}</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Image Gallery Section */}
-        {images.length > 0 && (
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Gallery</h2>
-            
-            {/* Tab Navigation */}
-            {availableTabs.length > 1 && (
-              <div className={styles.tabNavigation}>
-                {availableTabs.map((tab) => (
-                  <button
-                    key={tab}
-                    className={`${styles.tabButton} ${activeTab === tab ? styles.active : ''}`}
-                    onClick={() => {
-                      setActiveTab(tab);
-                      setLightboxIndex(null);
-                    }}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
+        <div className={styles.screenshotGrid}>
+          {images.map((src: string, i: number) => (
+            <div key={i} className={styles.screenshotItem} onClick={() => setLightboxIndex(i)}>
+              <img src={src} alt={`screenshot ${i + 1}`} loading="lazy" onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }} />
+              <div className={styles.screenshotOverlay}>
+                <span>⤢</span>
               </div>
-            )}
-
-            {/* Main Lightbox */}
-            {lightboxIndex !== null && (
-              <div className={styles.lightbox} onClick={closeLightbox}>
-                <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
-                  <img src={images[lightboxIndex]} alt={`Image ${lightboxIndex}`} className={styles.lightboxImage} />
-                  <button className={styles.prevButton} onClick={handlePrevLightbox}>‹</button>
-                  <button className={styles.nextButton} onClick={handleNextLightbox}>›</button>
-                  <button className={styles.closeButton} onClick={closeLightbox}>×</button>
-                </div>
-              </div>
-            )}
-
-            {/* Thumbnails */}
-            <div 
-              className={styles.thumbnailsContainer}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseLeave}
-              ref={thumbnailsRef}
-            >
-              {images.map((image, idx) => (
-                <img
-                  key={idx}
-                  src={image}
-                  alt={`Thumbnail ${idx}`}
-                  className={`${styles.thumbnail} ${lightboxIndex === idx ? styles.active : ''}`}
-                  onClick={() => setLightboxIndex(idx)}
-                />
-              ))}
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,6 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     return notFound();
   }
 
-  return <ClientProjectDetail project={project} />;
+  return <ClientProjectDetail project={project} params={params} />;
 }
 
