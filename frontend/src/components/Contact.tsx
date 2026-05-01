@@ -34,7 +34,8 @@ export const Contact = () => {
     setLoading(true);
 
     try {
-      await axios.post('/api/contact', formData);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://nattapon-k-7omn.vercel.app';
+      await axios.post(`${backendUrl}/api/contact`, formData);
       setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setSubmitted(false), 5000);
