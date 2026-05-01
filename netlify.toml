@@ -1,13 +1,11 @@
 [build]
   command = "cd frontend && npm run build"
-  publish = "frontend/.next/standalone"
-  functions = "backend"
+  publish = "frontend/out"
 
 [[redirects]]
   from = "/*"
-  to = "/"
+  to = "/index.html"
   status = 200
 
 [context.production.environment]
   NODE_ENV = "production"
-  NEXT_PUBLIC_API_URL = "https://nattapon.k/api"
