@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import '../styles/globals.css';
 import type { ReactNode } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   title: 'Portfolio - ณัฐพล ฆ้องคำ',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body>
         {children}
+        <Analytics />
       </body>
     </html>
   );
