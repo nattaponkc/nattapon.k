@@ -1,7 +1,7 @@
 import styles from '../styles/About.module.css';
 
 export const About = () => {
-  const getSkillLevel = (percentage) => {
+  const getSkillLevel = (percentage: number) => {
     if (percentage >= 80) return 'Advanced';
     if (percentage >= 60) return 'Intermediate';
     if (percentage >= 40) return 'Familiar';
