@@ -7,6 +7,8 @@ import { ProjectAnimatedBackground } from '../../../components/ProjectAnimatedBa
 import styles from '../../../styles/ProjectDetail.module.css';
 import { getProjectData } from './projectsData';
 
+export { generateStaticParams } from './projectsData';
+
 export default function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = getProjectData(params.id);
   
