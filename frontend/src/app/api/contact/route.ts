@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 
 interface ContactFormData {
   name: string;
@@ -7,6 +8,14 @@ interface ContactFormData {
   subject: string;
   message: string;
 }
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,8 +48,30 @@ export async function POST(request: NextRequest) {
       timestamp: new Date(),
     });
 
-    // TODO: Send email using your email service
-    // Example: await sendEmail(email, subject, message)
+    // Send email notification to admin
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: process.env.ADMIN_EMAIL,
+        subject: `📧 New Contact Message: ${subject}`,
+        html: `
+          <h2>New Contact Message</h2>
+          <p><strong>From:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <hr />
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+          <hr />
+          <p><em>Sent at: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' })}</em></p>
+        `,
+        replyTo: email,
+      });
+
+      console.log('Notification email sent successfully');
+    } catch (emailError) {
+      console.error('Error sending email:', emailError);
+    }
 
     return NextResponse.json(
       {
